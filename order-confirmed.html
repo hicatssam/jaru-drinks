@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Confirm Order - Al Jarou</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url('images/background.jpg');
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    img {
+      width: 120px;
+      animation: fadeIn 1s ease-in-out;
+    }
+    .confirmation-box {
+      background-color: #FFC501;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 80%;
+      margin: 20px auto;
+      animation: slideIn 1s ease;
+    }
+    .drink-photo {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      animation: zoomIn 1s ease;
+    }
+    h1, p { animation: fadeIn 1s ease-in-out; }
+    h1 { font-size: 24px; color: #333; }
+    p { font-size: 18px; color: #555; }
+    #timer { font-size: 20px; color: #e53935; margin-top: 20px; }
+    .cancel-btn {
+      background-color: #f44336;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.3s ease;
+    }
+    .cancel-btn:hover { background-color: #d32f2f; }
+    .confirmed-message {
+      color: #28a745;
+      font-size: 20px;
+      margin-top: 20px;
+      display: none;
+    }
+    .language-toggle {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      font-size: 18px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+    @keyframes slideIn { from {transform: translateY(-20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+    @keyframes zoomIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+  </style>
+</head>
+<body lang="en">
+  <header>
+    <img src="images/logo.svg.jpg" alt="Jaru Logo" />
+  </header>
+
+  <button class="language-toggle" onclick="toggleLanguage()">🌍 العربية / English</button>
+
+  <div class="confirmation-box">
+    <h1 id="welcomeText">Thank you, <span id="customerName"></span>!</h1>
+    <p id="orderDetails">Your order is being confirmed...</p>
+    <p><span id="totalPrice"></span> ILS</p>
+    <div id="timer"></div>
+    <div class="cancel-btn" id="cancelBtn">Cancel Order</div>
+    <div class="confirmed-message" id="confirmedMsg"></div>
+  </div>
+
+  <audio id="confirmationSound" src="sounds/confrim.mp3" preload="auto"></audio>
+
+  <script>
+    const body = document.querySelector('body');
+    const welcomeText = document.getElementById('welcomeText');
+    const orderDetails = document.getElementById('orderDetails');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const confirmedMsg = document.getElementById('confirmedMsg');
+    const confirmationSound = document.getElementById('confirmationSound');
+    const totalPriceElement = document.getElementById('totalPrice');
+    const timerElement = document.getElementById('timer');
+  
+    const customerName = localStorage.getItem('customerName') || '';
+    const drinksOrder = JSON.parse(localStorage.getItem('drinksOrder') || '[]');
+  
+    document.getElementById('customerName').textContent = customerName;
+  
+    let total = 0;
+    let drinkSummary = '';
+    drinksOrder.forEach(d => {
+      total += d.price * d.quantity;
+   
+      let sugarText = d.sugarChoice === true ? "With Sugar" : "Without Sugar";
+      drinkSummary += `${d.quantity} x ${d.drinkName} (${sugarText})<br>`;
+    });
+  
+    orderDetails.innerHTML = drinkSummary;
+    totalPriceElement.textContent = total;
+  
+    function toggleLanguage() {
+      const lang = body.getAttribute('lang');
+      if (lang === 'en') {
+        body.setAttribute('lang', 'ar');
+        welcomeText.innerHTML = 'شكراً لك، <span id="customerName"></span>!';
+        cancelBtn.textContent = 'إلغاء الطلب';
+        confirmedMsg.textContent = '✅ تم تأكيد الطلب! رقم الطلب: ...';
+      } else {
+        body.setAttribute('lang', 'en');
+        welcomeText.innerHTML = 'Thank you, <span id="customerName"></span>!';
+        cancelBtn.textContent = 'Cancel Order';
+        confirmedMsg.textContent = '✅ Order Confirmed! Order No: ...';
+      }
+      document.getElementById('customerName').textContent = customerName;
+    }
+
+    let canGoBack = false;
+
+   
+    history.pushState(null, null, location.href);
+
+    window.addEventListener('popstate', function () {
+      if (!canGoBack) {
+        location.replace('index.html'); 
+      }
+    });
+
+    let countdown = 10;
+    let orderCancelled = false;
+  
+    const interval = setInterval(() => {
+      if (orderCancelled) return clearInterval(interval);
+      timerElement.textContent = (body.lang === 'ar')
+        ? `الوقت المتبقي: ${countdown}s`
+        : `Time remaining: ${countdown}s`;
+  
+      countdown--;
+  
+      if (countdown < 0) {
+        clearInterval(interval);
+        cancelBtn.style.display = 'none';
+        confirmationSound.play();
+  
+        fetch('save-order.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerName,
+            drinksOrder
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            confirmedMsg.innerHTML = `✅ Order Confirmed! Order No: ${data.orderNumber}`;
+            confirmedMsg.style.display = 'block';
+            canGoBack = true;
+            setTimeout(() => window.location.href = 'index.html', 3000);
+          } else {
+            confirmedMsg.textContent = '❌ Failed to save order!';
+          }
+        });
+      }
+    }, 1000);
+  
+    cancelBtn.addEventListener('click', () => {
+      orderCancelled = true;
+      canGoBack = true;
+      clearInterval(interval);
+      localStorage.clear();
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تفاصيل الطلبات - الجرو | Order Details - Al Jarou</title>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background-color: #FFC501;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #222;
+      font-size: 32px;
+    }
+
+    header img {
+      height: 75px;
+      position: absolute;
+      right: 20px;
+      top: 15px;
+    }
+
+    .lang-toggle {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .card-orders {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 40px 0;
+    }
+
+    .order-card {
+      background: linear-gradient(to right, #fff0c2, #ffeaa7);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      flex: 1 1 calc(33.333% - 40px);
+      min-width: 280px;
+      transition: 0.3s ease;
+    }
+
+    .order-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+
+    .order-card h3 {
+      margin: 0 0 10px;
+      color: #222;
+    }
+
+    .order-card p {
+      margin: 5px 0;
+    }
+
+    .order-card .price {
+      font-weight: bold;
+      color: #e53935;
+    }
+
+    .order-card .status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .status.confirmed {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    .status.canceled {
+      background-color: #f44336;
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #ffe082;
+      color: #444;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="images/logo.svg.jpg" alt="Al Jarou Logo">
+  <h1 id="page-title">تفاصيل الطلبات - الجرو | Order Details - Al Jarou</h1>
+  <button class="lang-toggle" onclick="toggleLang()">English</button>
+</header>
+
+<div class="container">
+  <h2 id="latest-title">أحدث 5 طلبات | Latest 5 Orders</h2>
+  <div class="card-orders" id="latest-orders"></div>
+
+  <h2 id="all-title">جميع الطلبات الأخرى | All Other Orders</h2>
+  <table>
+    <thead>
+      <tr>
+        <th id="th-customer">الزبون | Customer</th>
+        <th id="th-orders">الطلبات | Orders</th>
+        <th id="th-total">المبلغ | Total</th>
+        <th id="th-date">التاريخ | Date</th>
+        <th id="th-status">الحالة | Status</th>
+      </tr>
+    </thead>
+    <tbody id="table-orders"></tbody>
+  </table>
+</div>
+
+<footer>
+  <p id="footer-text">&copy; 2025 Al Jarou. جميع الحقوق محفوظة. | All rights reserved.</p>
+</footer>
+
+<script>
+const translations = {
+  ar: {
+    pageTitle: "تفاصيل الطلبات - الجرو",
+    latest: "أحدث 5 طلبات",
+    all: "جميع الطلبات الأخرى",
+    customer: "الزبون",
+    orders: "الطلبات",
+    total: "المبلغ",
+    date: "التاريخ",
+    status: "الحالة",
+    confirmed: "مؤكد",
+    canceled: "ملغي",
+    footer: "&copy; 2025 Al Jarou. جميع الحقوق محفوظة.",
+    button: "English"
+  },
+  en: {
+    pageTitle: "Order Details - Al Jarou",
+    latest: "Latest 5 Orders",
+    all: "All Other Orders",
+    customer: "Customer",
+    orders: "Orders",
+    total: "Total",
+    date: "Date",
+    status: "Status",
+    confirmed: "Confirmed",
+    canceled: "Canceled",
+    footer: "&copy; 2025 Al Jarou. All rights reserved.",
+    button: "العربية"
+  }
+};
+
+let currentLang = 'ar';
+let orders = [];
+
+function toggleLang() {
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  const t = translations[currentLang];
+  document.getElementById('page-title').innerHTML = t.pageTitle;
+  document.getElementById('latest-title').textContent = t.latest;
+  document.getElementById('all-title').textContent = t.all;
+  document.getElementById('th-customer').textContent = t.customer;
+  document.getElementById('th-orders').textContent = t.orders;
+  document.getElementById('th-total').textContent = t.total;
+  document.getElementById('th-date').textContent = t.date;
+  document.getElementById('th-status').textContent = t.status;
+  document.getElementById('footer-text').innerHTML = t.footer;
+  document.querySelector('.lang-toggle').textContent = t.button;
+  renderOrders();
+}
+
+function renderOrders() {
+  const latestContainer = document.getElementById("latest-orders");
+  const tableBody = document.getElementById("table-orders");
+  latestContainer.innerHTML = "";
+  tableBody.innerHTML = "";
+
+  const latestOrders = orders.slice(0, 5);
+  const otherOrders = orders.slice(5);
+
+  latestOrders.forEach((order, index) => {
+    const div = document.createElement("div");
+    div.className = "order-card";
+    div.innerHTML = `
+      <h3>طلب رقم #${index + 1}</h3>
+      <p><strong>${order.name}</strong></p>
+      <p><strong>${translations[currentLang].orders}</strong>: ${order.items}</p>
+      <p class="price">${translations[currentLang].total}: ${order.total} ₪</p>
+      <p>${translations[currentLang].date}: ${order.date}</p>
+      <span class="status ${order.status}">${translations[currentLang][order.status]}</span>
+    `;
+    latestContainer.appendChild(div);
+  });
+
+  otherOrders.forEach((order, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td><strong>#${index + 6}</strong> - ${order.name}</td>
+      <td>${order.items}</td>
+      <td>${order.total} ₪</td>
+      <td>${order.date}</td>
+      <td><span class="status ${order.status}">${translations[currentLang][order.status]}</span></td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
+fetch('orders.json')
+  .then(res => res.json())
+  .then(data => {
+    orders = data.map(order => ({
+      name: order.customerName,
+      items: order.drinksOrder.map(drink => {
+        return `${drink.drinkName} ×${drink.quantity} ${drink.sugarChoice === false ? '(without sugar)' : (drink.sugarChoice ? '(with sugar)' : '')} - ${drink.price} ₪`;
+      }).join('، '),
+      total: order.totalPrice,
+      date: `${order.date} ${order.time}`,
+      status: order.status || "confirmed"
+    }));
+    orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+    renderOrders();
+  })
+  .catch(err => {
+    console.error("Error loading orders:", err);
+  });
+
+</script>
+
+</body>
+</html>
