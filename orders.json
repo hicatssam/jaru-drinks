@@ -1,3 +1,143 @@
 [
-  
+    {
+        "orderNumber": 1,
+        "id": "68132cf97e1d0",
+        "customerName": "LALA",
+        "drinksOrder": [
+            {
+                "id": 1746087136100,
+                "drinkName": "Tea",
+                "sugarChoice": true,
+                "quantity": 2,
+                "price": 4
+            }
+        ],
+        "totalPrice": 8,
+        "date": "2025-05-01 (Thursday)",
+        "time": "08:12 AM"
+    },
+    {
+        "orderNumber": 2,
+        "id": "68133f40698de",
+        "customerName": "Yousef khader",
+        "drinksOrder": [
+            {
+                "id": 1746091799143,
+                "drinkName": "Coffee",
+                "sugarChoice": false,
+                "quantity": 1,
+                "price": 5
+            },
+            {
+                "id": 1746091802552,
+                "drinkName": "Nescaf\u00e9",
+                "sugarChoice": true,
+                "quantity": 2,
+                "price": 5
+            },
+            {
+                "id": 1746091809616,
+                "drinkName": "Tea",
+                "sugarChoice": true,
+                "quantity": 3,
+                "price": 4
+            }
+        ],
+        "totalPrice": 27,
+        "date": "2025-05-01 (Thursday)",
+        "time": "09:30 AM"
+    },
+    {
+        "orderNumber": 3,
+        "id": "6814bbb2e5067",
+        "customerName": "Manal Mustafa",
+        "drinksOrder": [
+            {
+                "id": 1746189203499,
+                "drinkName": "Coffee",
+                "sugarChoice": false,
+                "quantity": 1,
+                "price": 5
+            },
+            {
+                "id": 1746189206974,
+                "drinkName": "Nescaf\u00e9",
+                "sugarChoice": true,
+                "quantity": 2,
+                "price": 5
+            },
+            {
+                "id": 1746189213300,
+                "drinkName": "Tea",
+                "sugarChoice": true,
+                "quantity": 2,
+                "price": 4
+            }
+        ],
+        "totalPrice": 23,
+        "date": "2025-05-02 (Friday)",
+        "time": "12:33 PM"
+    },
+    {
+        "orderNumber": 4,
+        "id": "6815f763446f8",
+        "customerName": "Fadi Al jaru",
+        "drinksOrder": [
+            {
+                "id": 1746270020292,
+                "drinkName": "Coffee",
+                "sugarChoice": false,
+                "quantity": 1,
+                "price": 5
+            },
+            {
+                "id": 1746270023523,
+                "drinkName": "Nescaf\u00e9",
+                "sugarChoice": true,
+                "quantity": 2,
+                "price": 5
+            },
+            {
+                "id": 1746270030895,
+                "drinkName": "Tea",
+                "sugarChoice": true,
+                "quantity": 3,
+                "price": 4
+            }
+        ],
+        "totalPrice": 27,
+        "date": "2025-05-03 (Saturday)",
+        "time": "11:00 AM"
+    },
+    {
+        "orderNumber": 5,
+        "id": "6818923b475a9",
+        "customerName": "Abed al shawa ",
+        "drinksOrder": [
+            {
+                "id": 1746440733477,
+                "drinkName": "Coffee",
+                "sugarChoice": false,
+                "quantity": 1,
+                "price": 5
+            },
+            {
+                "id": 1746440737180,
+                "drinkName": "Nescaf\u00e9",
+                "sugarChoice": true,
+                "quantity": 2,
+                "price": 5
+            },
+            {
+                "id": 1746440744948,
+                "drinkName": "Tea",
+                "sugarChoice": false,
+                "quantity": 2,
+                "price": 4
+            }
+        ],
+        "totalPrice": 23,
+        "date": "2025-05-05 (Monday)",
+        "time": "10:26 AM"
+    }
 ]
