@@ -114,36 +114,44 @@
     return sugarChoice === true || sugarChoice==='true' ? 'With Sugar':'Without Sugar'; 
   }
 
-  // عرض المشروبات المضافة
-  function renderDrinks() {
-    const container = document.getElementById('addedDrinksContainer');
-    container.innerHTML = '';
-    totalPrice = 0;
-    drinksOrder.forEach(drink => {
-      const div = document.createElement('div');
-      div.className = 'added-drink-card';
-      const drinkImage = drinkData[drink.drinkName]?.image || 'images/default.jpg';
-      div.innerHTML = `
-        <img class="drink-image" src="${drinkImage}" alt="${drink.drinkName}">
-        <select onchange="updateDrink('${drink.id}','drinkName',this.value)">
-          <option value="Coffee" ${drink.drinkName==='Coffee'?'selected':''}>Coffee</option>
-          <option value="Nescafé" ${drink.drinkName==='Nescafé'?'selected':''}>Nescafé</option>
-          <option value="Tea" ${drink.drinkName==='Tea'?'selected':''}>Tea</option>
-        </select>
-        <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}','quantity',this.value)">
-        <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
-          <option value="true" ${drink.sugarChoice===true?'selected':''}>With Sugar</option>
-          <option value="false" ${drink.sugarChoice===false?'selected':''}>Without Sugar</option>
-        </select>
-        <p><strong>Sugar:</strong> ${getSugarLabel(drink.sugarChoice)}</p>
-        <p><strong>Price:</strong> ${drink.price*drink.quantity} ILS</p>
-        <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
-      `;
-      container.appendChild(div);
-      totalPrice += drink.price*drink.quantity;
-    });
-    localStorage.setItem('totalPrice', totalPrice);
-  }
+ // عرض المشروبات المضافة
+function renderDrinks() {
+  const container = document.getElementById('addedDrinksContainer');
+  container.innerHTML = '';
+  totalPrice = 0;
+
+  drinksOrder.forEach(drink => {
+    const div = document.createElement('div');
+    div.className = 'added-drink-card';
+    const drinkImage = drinkData[drink.drinkName]?.image || 'images/default.jpg';
+
+    // توليد خيارات select تلقائيًا
+    let optionsHtml = '';
+    for (let drinkName in drinkData) {
+      optionsHtml += `<option value="${drinkName}" ${drink.drinkName === drinkName ? 'selected' : ''}>${drinkName}</option>`;
+    }
+
+    div.innerHTML = `
+      <img class="drink-image" src="${drinkImage}" alt="${drink.drinkName}">
+      <select onchange="updateDrink('${drink.id}','drinkName',this.value)">
+        ${optionsHtml}
+      </select>
+      <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}','quantity',this.value)">
+      <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
+        <option value="true" ${drink.sugarChoice===true?'selected':''}>With Sugar</option>
+        <option value="false" ${drink.sugarChoice===false?'selected':''}>Without Sugar</option>
+      </select>
+      <p><strong>Sugar:</strong> ${getSugarLabel(drink.sugarChoice)}</p>
+      <p><strong>Price:</strong> ${drink.price*drink.quantity} ILS</p>
+      <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
+    `;
+
+    container.appendChild(div);
+    totalPrice += drink.price*drink.quantity;
+  });
+
+  localStorage.setItem('totalPrice', totalPrice);
+}
 
   // تعديل مشروب
   function updateDrink(id, field, value) {
