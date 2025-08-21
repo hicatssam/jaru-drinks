@@ -94,7 +94,9 @@
   window.addEventListener("beforeunload", () => { backgroundSound.pause(); backgroundSound.currentTime = 0; });
 
   function addDrink() {
-    drinksOrder.push({ id: Date.now(), drinkName: 'Coffee', sugarChoice: false, quantity: 1, price: 5 });
+    drinksOrder.push({ id: Date.now(), drinkName: 'Coffee', sugarChoice: false, quantity: 1, price: 6 },
+    { id: Date.now(), drinkName: 'Tea', sugarChoice: false, quantity: 1, price: 5 },
+  { id: Date.now(), drinkName: 'Nescafe', sugarChoice: false, quantity: 1, price: 8 });
     renderDrinks();
   }
 
