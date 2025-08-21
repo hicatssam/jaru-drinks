@@ -5,14 +5,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Al-Jaru Drinks Order</title>
 <style>
-  body { font-family: Arial, sans-serif; background: url('images/background.jpg'); margin:0; padding:0; text-align:center; }
+  body {
+    font-family: Arial, sans-serif;
+    background: url('images/background.jpg');
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
   img { width: 120px; }
   .container { padding: 30px; }
-  .order-form { margin-top: 20px; display: flex; flex-direction: column; align-items: center; }
-  .order-form input, .order-form select { padding: 10px; margin: 10px 0; width: 300px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; }
-  button { width: 250px; background-color: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-  .added-drinks-container { width: max-content; margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
-  .added-drink-card { background: #fff; padding: 15px; border-radius: 8px; width: 270px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.8s ease; }
+  .order-form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .order-form input, .order-form select {
+    padding: 10px;
+    margin: 10px 0;
+    width: 300px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  button {
+    width: 250px;
+    background-color: #28a745;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .added-drinks-container {
+    width: max-content;
+    margin-top: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+  }
+  .added-drink-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    width: 270px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.8s ease;
+  }
   .added-drink-card select, .added-drink-card input { margin: 5px 0; width: 90%; }
   .delete-btn { background-color: #f44336; margin-top: 10px; }
   .drink-image { width: 250px; height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
@@ -34,46 +78,58 @@
   <form id="orderForm" class="order-form">
     <input type="text" id="customerName" placeholder="Enter your name" required>
     <div id="addedDrinksContainer" class="added-drinks-container"></div>
-    <button type="button" onclick="addDrink()">Add Drink</button>
+    <button type="button" id="addDrinkBtn">Add Drink</button>
     <button type="submit">Confirm Order</button>
   </form>
 </div>
 
 <script>
+  // Variables
   const backgroundSound = document.getElementById("backgroundSound");
   let drinksOrder = [];
   let totalPrice = 0;
 
-  // مشروبات وصورها وأسعارها
-  const drinksInfo = {
+  // الصور والأسعار لكل مشروب
+  const drinkData = {
     'Coffee': { image: 'images/coffee.jpg', price: 6 },
-    'Nescafé': { image: 'images/nescafe.png', price: 7 },
-    'Tea': { image: 'images/tea.png', price: 5 }
+    'Nescafé': { image: 'images/nescafe.png', price: 5 },
+    'Tea': { image: 'images/tea.png', price: 4 }
   };
 
   document.addEventListener("click", () => { backgroundSound.play().catch(e=>console.log(e)); }, {once:true});
   window.addEventListener("beforeunload", () => { backgroundSound.pause(); backgroundSound.currentTime = 0; });
 
+  // إضافة مشروب جديد
   function addDrink() {
-    drinksOrder.push({ id: Date.now(), drinkName: 'Coffee', sugarChoice: false, quantity: 1, price: drinksInfo['Coffee'].price });
+    drinksOrder.push({ 
+      id: Date.now(), 
+      drinkName: 'Coffee', 
+      sugarChoice: false, 
+      quantity: 1, 
+      price: drinkData['Coffee'].price
+    });
     renderDrinks();
   }
 
-  function getSugarLabel(sugarChoice) { return sugarChoice===true || sugarChoice==='true' ? 'With Sugar' : 'Without Sugar'; }
+  function getSugarLabel(sugarChoice) { 
+    return sugarChoice === true || sugarChoice==='true' ? 'With Sugar':'Without Sugar'; 
+  }
 
+  // عرض المشروبات المضافة
   function renderDrinks() {
     const container = document.getElementById('addedDrinksContainer');
     container.innerHTML = '';
     totalPrice = 0;
-
     drinksOrder.forEach(drink => {
       const div = document.createElement('div');
       div.className = 'added-drink-card';
-      const drinkImage = drinksInfo[drink.drinkName]?.image || 'images/default.jpg';
+      const drinkImage = drinkData[drink.drinkName]?.image || 'images/default.jpg';
       div.innerHTML = `
         <img class="drink-image" src="${drinkImage}" alt="${drink.drinkName}">
         <select onchange="updateDrink('${drink.id}','drinkName',this.value)">
-          ${Object.keys(drinksInfo).map(d => `<option value="${d}" ${drink.drinkName===d?'selected':''}>${d}</option>`).join('')}
+          <option value="Coffee" ${drink.drinkName==='Coffee'?'selected':''}>Coffee</option>
+          <option value="Nescafé" ${drink.drinkName==='Nescafé'?'selected':''}>Nescafé</option>
+          <option value="Tea" ${drink.drinkName==='Tea'?'selected':''}>Tea</option>
         </select>
         <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}','quantity',this.value)">
         <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
@@ -87,36 +143,54 @@
       container.appendChild(div);
       totalPrice += drink.price*drink.quantity;
     });
-
     localStorage.setItem('totalPrice', totalPrice);
   }
 
+  // تعديل مشروب
   function updateDrink(id, field, value) {
     drinksOrder = drinksOrder.map(drink => {
       if(drink.id==id){
         if(field==='drinkName'){ 
           drink.drinkName = value; 
-          drink.price = drinksInfo[value].price; // تحديث السعر حسب المشروب
+          drink.price = drinkData[value].price; 
         }
-        else if(field==='quantity'){ drink.quantity = Math.max(1, parseInt(value)); }
-        else if(field==='sugarChoice'){ drink.sugarChoice = (value==='true'); }
+        else if(field==='quantity'){ 
+          drink.quantity = Math.max(1, parseInt(value)); 
+        }
+        else if(field==='sugarChoice'){ 
+          drink.sugarChoice = (value==='true'); 
+        }
       }
       return drink;
     });
     renderDrinks();
   }
 
-  function deleteDrink(id){ drinksOrder = drinksOrder.filter(d=>d.id!=id); renderDrinks(); }
+  // حذف مشروب
+  function deleteDrink(id){ 
+    drinksOrder = drinksOrder.filter(d => d.id != id); 
+    renderDrinks(); 
+  }
 
-  function getPalestineTime(){ return new Date().toLocaleString("en-US",{timeZone:"Asia/Hebron"}); }
+  function getPalestineTime(){ 
+    return new Date().toLocaleString("en-US",{timeZone:"Asia/Hebron"}); 
+  }
 
+  // زر إضافة مشروب
+  document.getElementById('addDrinkBtn').addEventListener('click', addDrink);
+
+  // حفظ الطلب
   document.getElementById('orderForm').addEventListener('submit', function(e){
     e.preventDefault();
     const name = document.getElementById('customerName').value;
-    if(drinksOrder.length===0){ alert('Please add at least one drink!'); return; }
+    if(drinksOrder.length===0){ 
+      alert('Please add at least one drink!'); 
+      return; 
+    }
 
     const [date,time] = getPalestineTime().split(", ");
 
+    // حفظ البيانات محليًا فقط
     localStorage.setItem('customerName', name);
     localStorage.setItem('drinksOrder', JSON.stringify(drinksOrder));
     localStorage.setItem('date', date);
