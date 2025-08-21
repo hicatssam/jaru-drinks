@@ -1,74 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Al-Jaru Drinks Order</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: url('images/background.jpg');
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    img { width: 120px; }
-    .container { padding: 30px; }
-    .order-form {
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .order-form input, .order-form select {
-      padding: 10px;
-      margin: 10px 0;
-      width: 300px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    button {
-      width: 250px;
-      background-color: #28a745;
-      color: #fff;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .added-drinks-container {
-      width: max-content;
-      margin-top: 5px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      justify-content: center;
-    }
-    .added-drink-card {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      width: 270px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      animation: fadeIn 0.8s ease;
-    }
-    .added-drink-card select, .added-drink-card input { margin: 5px 0; width: 90%; }
-    .delete-btn { background-color: #f44336; margin-top: 10px; }
-    .drink-image { width: 250px; height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
-    @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
-  </style>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Al-Jaru Drinks Order</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: url('images/background.jpg');
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+  img { width: 120px; }
+  .container { padding: 30px; }
+  .order-form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .order-form input, .order-form select {
+    padding: 10px;
+    margin: 10px 0;
+    width: 300px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  button {
+    width: 250px;
+    background-color: #28a745;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .added-drinks-container {
+    width: max-content;
+    margin-top: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+  }
+  .added-drink-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    width: 270px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.8s ease;
+  }
+  .added-drink-card select, .added-drink-card input { margin: 5px 0; width: 90%; }
+  .delete-btn { background-color: #f44336; margin-top: 10px; }
+  .drink-image { width: 250px; height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+  @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+</style>
 </head>
-<body lang="en">
+<body>
 
 <header>
   <img src="images/logo.svg.jpg" alt="Jaru Logo">
@@ -89,20 +84,6 @@
 </div>
 
 <script>
-  // Firebase Configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyCEsjPeY7773MQeSyiL6M1n4RHRl5TGAyk",
-    authDomain: "jaru-drinks.firebaseapp.com",
-    projectId: "jaru-drinks",
-    storageBucket: "jaru-drinks.firebasestorage.app",
-    messagingSenderId: "317969024088",
-    appId: "1:317969024088:web:d99f66953f06572779f62d",
-    measurementId: "G-SL3NCVB6WC"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const analytics = firebase.analytics();
-
   // Variables
   const backgroundSound = document.getElementById("backgroundSound");
   let drinksOrder = [];
@@ -117,7 +98,9 @@
     renderDrinks();
   }
 
-  function getSugarLabel(sugarChoice) { return sugarChoice === true || sugarChoice==='true' ? 'With Sugar':'Without Sugar'; }
+  function getSugarLabel(sugarChoice) { 
+    return sugarChoice === true || sugarChoice==='true' ? 'With Sugar':'Without Sugar'; 
+  }
 
   function renderDrinks() {
     const container = document.getElementById('addedDrinksContainer');
@@ -146,6 +129,7 @@
       container.appendChild(div);
       totalPrice += drink.price*drink.quantity;
     });
+    // حفظ السعر الكلي فقط
     localStorage.setItem('totalPrice', totalPrice);
   }
 
@@ -173,23 +157,15 @@
 
     const [date,time] = getPalestineTime().split(", ");
 
-    // Save locally
+    // حفظ البيانات محليًا فقط
     localStorage.setItem('customerName', name);
     localStorage.setItem('drinksOrder', JSON.stringify(drinksOrder));
     localStorage.setItem('date', date);
     localStorage.setItem('time', time);
     localStorage.setItem('totalPrice', totalPrice);
 
-    // Save to Firebase
-    db.collection("orders").add({
-      customerName: name,
-      drinksOrder: drinksOrder,
-      date: date,
-      time: time,
-      totalPrice: totalPrice
-    })
-    .then(() => { console.log("Order saved!"); window.location.href='order-confirmed.html'; })
-    .catch(err=>{ console.error(err); alert("Failed to save order!"); });
+    console.log("Order saved locally!");
+    window.location.href='order-confirmed.html';
   });
 </script>
 
