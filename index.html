@@ -114,7 +114,7 @@
     return sugarChoice === true || sugarChoice==='true' ? 'With Sugar':'Without Sugar'; 
   }
 
- // عرض المشروبات المضافة
+// عرض المشروبات المضافة
 function renderDrinks() {
   const container = document.getElementById('addedDrinksContainer');
   container.innerHTML = '';
@@ -152,6 +152,7 @@ function renderDrinks() {
 
   localStorage.setItem('totalPrice', totalPrice);
 }
+
 
   // تعديل مشروب
   function updateDrink(id, field, value) {
