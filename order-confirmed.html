@@ -12,10 +12,7 @@
       padding: 0;
       text-align: center;
     }
-    img {
-      width: 120px;
-      animation: fadeIn 1s ease-in-out;
-    }
+    img { width: 120px; animation: fadeIn 1s ease-in-out; }
     .confirmation-box {
       background-color: #FFC501;
       border-radius: 8px;
@@ -25,43 +22,18 @@
       margin: 20px auto;
       animation: slideIn 1s ease;
     }
-    .drink-photo {
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 8px;
-      animation: zoomIn 1s ease;
-    }
+    .drink-photo { width: 150px; height: 150px; object-fit: cover; border-radius: 8px; animation: zoomIn 1s ease; }
     h1, p { animation: fadeIn 1s ease-in-out; }
     h1 { font-size: 24px; color: #333; }
     p { font-size: 18px; color: #555; }
     #timer { font-size: 20px; color: #e53935; margin-top: 20px; }
     .cancel-btn {
-      background-color: #f44336;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 20px;
-      transition: background-color 0.3s ease;
+      background-color: #f44336; color: white; padding: 10px 20px; border: none;
+      border-radius: 8px; cursor: pointer; margin-top: 20px; transition: background-color 0.3s ease;
     }
     .cancel-btn:hover { background-color: #d32f2f; }
-    .confirmed-message {
-      color: #28a745;
-      font-size: 20px;
-      margin-top: 20px;
-      display: none;
-    }
-    .language-toggle {
-      position: absolute;
-      top: 10px;
-      left: 20px;
-      font-size: 18px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
+    .confirmed-message { color: #28a745; font-size: 20px; margin-top: 20px; display: none; }
+    .language-toggle { position: absolute; top: 10px; left: 20px; font-size: 18px; background: none; border: none; cursor: pointer; }
     @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
     @keyframes slideIn { from {transform: translateY(-20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
     @keyframes zoomIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
@@ -85,6 +57,28 @@
 
   <audio id="confirmationSound" src="sounds/confrim.mp3" preload="auto"></audio>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCEsjPeY7773MQeSyiL6M1n4RHRl5TGAyk",
+      authDomain: "jaru-drinks.firebaseapp.com",
+      projectId: "jaru-drinks",
+      storageBucket: "jaru-drinks.firebasestorage.app",
+      messagingSenderId: "317969024088",
+      appId: "1:317969024088:web:d99f66953f06572779f62d",
+      measurementId: "G-SL3NCVB6WC"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const analytics = firebase.analytics();
+  </script>
+
   <script>
     const body = document.querySelector('body');
     const welcomeText = document.getElementById('welcomeText');
@@ -94,24 +88,23 @@
     const confirmationSound = document.getElementById('confirmationSound');
     const totalPriceElement = document.getElementById('totalPrice');
     const timerElement = document.getElementById('timer');
-  
+
     const customerName = localStorage.getItem('customerName') || '';
     const drinksOrder = JSON.parse(localStorage.getItem('drinksOrder') || '[]');
-  
+
     document.getElementById('customerName').textContent = customerName;
-  
+
     let total = 0;
     let drinkSummary = '';
     drinksOrder.forEach(d => {
       total += d.price * d.quantity;
-   
       let sugarText = d.sugarChoice === true ? "With Sugar" : "Without Sugar";
       drinkSummary += `${d.quantity} x ${d.drinkName} (${sugarText})<br>`;
     });
-  
+
     orderDetails.innerHTML = drinkSummary;
     totalPriceElement.textContent = total;
-  
+
     function toggleLanguage() {
       const lang = body.getAttribute('lang');
       if (lang === 'en') {
@@ -129,54 +122,48 @@
     }
 
     let canGoBack = false;
-
-   
     history.pushState(null, null, location.href);
-
     window.addEventListener('popstate', function () {
-      if (!canGoBack) {
-        location.replace('index.html'); 
-      }
+      if (!canGoBack) location.replace('index.html'); 
     });
 
     let countdown = 10;
     let orderCancelled = false;
-  
+
     const interval = setInterval(() => {
       if (orderCancelled) return clearInterval(interval);
       timerElement.textContent = (body.lang === 'ar')
         ? `الوقت المتبقي: ${countdown}s`
         : `Time remaining: ${countdown}s`;
-  
+
       countdown--;
-  
       if (countdown < 0) {
         clearInterval(interval);
         cancelBtn.style.display = 'none';
         confirmationSound.play();
-  
-        fetch('save-order.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customerName,
-            drinksOrder
-          })
+
+        // حفظ الطلب في Firebase
+        db.collection("orders").add({
+          customerName,
+          drinksOrder,
+          totalPrice: total,
+          date: new Date().toLocaleDateString(),
+          time: new Date().toLocaleTimeString()
         })
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === 'success') {
-            confirmedMsg.innerHTML = `✅ Order Confirmed! Order No: ${data.orderNumber}`;
-            confirmedMsg.style.display = 'block';
-            canGoBack = true;
-            setTimeout(() => window.location.href = 'index.html', 3000);
-          } else {
-            confirmedMsg.textContent = '❌ Failed to save order!';
-          }
+        .then(docRef => {
+          confirmedMsg.innerHTML = `✅ Order Confirmed! Order ID: ${docRef.id}`;
+          confirmedMsg.style.display = 'block';
+          canGoBack = true;
+          setTimeout(() => window.location.href = 'index.html', 3000);
+        })
+        .catch(error => {
+          console.error("Error adding document: ", error);
+          confirmedMsg.textContent = '❌ Failed to save order!';
+          confirmedMsg.style.display = 'block';
         });
       }
     }, 1000);
-  
+
     cancelBtn.addEventListener('click', () => {
       orderCancelled = true;
       canGoBack = true;

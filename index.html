@@ -12,12 +12,8 @@
       padding: 0;
       text-align: center;
     }
-    img {
-      width: 120px;
-    }
-    .container {
-      padding: 30px;
-    }
+    img { width: 120px; }
+    .container { padding: 30px; }
     .order-form {
       margin-top: 20px;
       display: flex;
@@ -61,26 +57,16 @@
       align-items: center;
       animation: fadeIn 0.8s ease;
     }
-    .added-drink-card select, .added-drink-card input {
-      margin: 5px 0;
-      width: 90%;
-    }
-    .delete-btn {
-      background-color: #f44336;
-      margin-top: 10px;
-    }
-    .drink-image {
-      width: 250px;
-      height: 250px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 10px;
-    }
-    @keyframes fadeIn {
-      from {opacity: 0; transform: translateY(20px);}
-      to {opacity: 1; transform: translateY(0);}
-    }
+    .added-drink-card select, .added-drink-card input { margin: 5px 0; width: 90%; }
+    .delete-btn { background-color: #f44336; margin-top: 10px; }
+    .drink-image { width: 250px; height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+    @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
   </style>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
 </head>
 <body lang="en">
 
@@ -91,61 +77,47 @@
 
 <audio id="backgroundSound" autoplay loop>
   <source src="sounds/background.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
 </audio>
 
 <div class="container">
   <form id="orderForm" class="order-form">
     <input type="text" id="customerName" placeholder="Enter your name" required>
     <div id="addedDrinksContainer" class="added-drinks-container"></div>
-
     <button type="button" onclick="addDrink()">Add Drink</button>
     <button type="submit">Confirm Order</button>
   </form>
 </div>
 
 <script>
+  // Firebase Configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCEsjPeY7773MQeSyiL6M1n4RHRl5TGAyk",
+    authDomain: "jaru-drinks.firebaseapp.com",
+    projectId: "jaru-drinks",
+    storageBucket: "jaru-drinks.firebasestorage.app",
+    messagingSenderId: "317969024088",
+    appId: "1:317969024088:web:d99f66953f06572779f62d",
+    measurementId: "G-SL3NCVB6WC"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const analytics = firebase.analytics();
+
+  // Variables
   const backgroundSound = document.getElementById("backgroundSound");
-
-  document.addEventListener("click", () => {
-    backgroundSound.play().catch((e) => {
-      console.log("Autoplay failed:", e);
-    });
-  }, { once: true });
-
-  window.addEventListener("beforeunload", () => {
-    backgroundSound.pause();
-    backgroundSound.currentTime = 0;
-  });
-
   let drinksOrder = [];
   let totalPrice = 0;
+  const drinkImages = { 'Coffee': 'images/coffee.jpg', 'Nescafé': 'images/nescafe.png', 'Tea': 'images/tea.png' };
 
-  function playSound(){
-    document.getElementById('backSound').play();
-  };
-
-  const drinkImages = {
-    'Coffee': 'images/coffee.jpg',
-    'Nescafé': 'images/nescafe.png',
-    'Tea': 'images/tea.png'
-  };
+  document.addEventListener("click", () => { backgroundSound.play().catch(e=>console.log(e)); }, {once:true});
+  window.addEventListener("beforeunload", () => { backgroundSound.pause(); backgroundSound.currentTime = 0; });
 
   function addDrink() {
-    const newDrink = {
-      id: Date.now(),
-      drinkName: 'Coffee',
-      sugarChoice: false,
-      quantity: 1,
-      price: 5
-    };
-    drinksOrder.push(newDrink);
+    drinksOrder.push({ id: Date.now(), drinkName: 'Coffee', sugarChoice: false, quantity: 1, price: 5 });
     renderDrinks();
   }
 
-  function getSugarLabel(sugarChoice) {
-    return sugarChoice === true || sugarChoice === 'true' ? 'With Sugar' : 'Without Sugar';
-  }
+  function getSugarLabel(sugarChoice) { return sugarChoice === true || sugarChoice==='true' ? 'With Sugar':'Without Sugar'; }
 
   function renderDrinks() {
     const container = document.getElementById('addedDrinksContainer');
@@ -154,82 +126,70 @@
     drinksOrder.forEach(drink => {
       const div = document.createElement('div');
       div.className = 'added-drink-card';
-
       const drinkImage = drinkImages[drink.drinkName] || 'images/default.jpg';
-
       div.innerHTML = `
         <img class="drink-image" src="${drinkImage}" alt="${drink.drinkName}">
-        <select onchange="updateDrink('${drink.id}', 'drinkName', this.value)">
-          <option value="Coffee" ${drink.drinkName === 'Coffee' ? 'selected' : ''}>Coffee</option>
-          <option value="Nescafé" ${drink.drinkName === 'Nescafé' ? 'selected' : ''}>Nescafé</option>
-          <option value="Tea" ${drink.drinkName === 'Tea' ? 'selected' : ''}>Tea</option>
+        <select onchange="updateDrink('${drink.id}','drinkName',this.value)">
+          <option value="Coffee" ${drink.drinkName==='Coffee'?'selected':''}>Coffee</option>
+          <option value="Nescafé" ${drink.drinkName==='Nescafé'?'selected':''}>Nescafé</option>
+          <option value="Tea" ${drink.drinkName==='Tea'?'selected':''}>Tea</option>
         </select>
-        <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}', 'quantity', this.value)">
-        <select onchange="updateDrink('${drink.id}', 'sugarChoice', this.value)">
-          <option value="true" ${drink.sugarChoice === true ? 'selected' : ''}>With Sugar</option>
-          <option value="false" ${drink.sugarChoice === false ? 'selected' : ''}>Without Sugar</option>
+        <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}','quantity',this.value)">
+        <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
+          <option value="true" ${drink.sugarChoice===true?'selected':''}>With Sugar</option>
+          <option value="false" ${drink.sugarChoice===false?'selected':''}>Without Sugar</option>
         </select>
         <p><strong>Sugar:</strong> ${getSugarLabel(drink.sugarChoice)}</p>
-        <p><strong>Price:</strong> ${drink.price * drink.quantity} ILS</p>
+        <p><strong>Price:</strong> ${drink.price*drink.quantity} ILS</p>
         <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
       `;
       container.appendChild(div);
-
-      totalPrice += drink.price * drink.quantity;
-      localStorage.setItem('totalPrice', totalPrice);
+      totalPrice += drink.price*drink.quantity;
     });
+    localStorage.setItem('totalPrice', totalPrice);
   }
 
   function updateDrink(id, field, value) {
     drinksOrder = drinksOrder.map(drink => {
-      if (drink.id == id) {
-        if (field === 'drinkName') {
-          drink.drinkName = value;
-          drink.price = (value === 'Tea') ? 4 : 5;
-        } else if (field === 'quantity') {
-          drink.quantity = Math.max(1, parseInt(value));
-        } else if (field === 'sugarChoice') {
-          drink.sugarChoice = (value === 'true'); 
-        }
+      if(drink.id==id){
+        if(field==='drinkName'){ drink.drinkName=value; drink.price=(value==='Tea')?4:5; }
+        else if(field==='quantity'){ drink.quantity=Math.max(1,parseInt(value)); }
+        else if(field==='sugarChoice'){ drink.sugarChoice=(value==='true'); }
       }
       return drink;
     });
     renderDrinks();
   }
 
-  function deleteDrink(id) {
-    drinksOrder = drinksOrder.filter(drink => drink.id != id);
-    renderDrinks();
-  }
+  function deleteDrink(id){ drinksOrder = drinksOrder.filter(d=>d.id!=id); renderDrinks(); }
 
-  function getPalestineTime() {
-  
-    const palestineTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Hebron" });
-    return palestineTime;
-  }
+  function getPalestineTime(){ return new Date().toLocaleString("en-US",{timeZone:"Asia/Hebron"}); }
 
-  document.getElementById('orderForm').addEventListener('submit', function(e) {
+  // Submit Form
+  document.getElementById('orderForm').addEventListener('submit', function(e){
     e.preventDefault();
     const name = document.getElementById('customerName').value;
-    
-    if (drinksOrder.length === 0) {
-      alert('Please add at least one drink before confirming!');
-      return;
-    }
+    if(drinksOrder.length===0){ alert('Please add at least one drink!'); return; }
 
-   
-    const currentDate = getPalestineTime();
-    
-    const [date, time] = currentDate.split(", ");
+    const [date,time] = getPalestineTime().split(", ");
 
-   
+    // Save locally
     localStorage.setItem('customerName', name);
     localStorage.setItem('drinksOrder', JSON.stringify(drinksOrder));
-    localStorage.setItem('totalPrice', totalPrice);
     localStorage.setItem('date', date);
     localStorage.setItem('time', time);
+    localStorage.setItem('totalPrice', totalPrice);
 
-    window.location.href = 'order-confirmed.html';
+    // Save to Firebase
+    db.collection("orders").add({
+      customerName: name,
+      drinksOrder: drinksOrder,
+      date: date,
+      time: time,
+      totalPrice: totalPrice
+    })
+    .then(() => { console.log("Order saved!"); window.location.href='order-confirmed.html'; })
+    .catch(err=>{ console.error(err); alert("Failed to save order!"); });
   });
 </script>
 
