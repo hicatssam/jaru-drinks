@@ -39,54 +39,100 @@
   </div>
 
 <script>
-  let drinksOrder = [];
-  let totalPrice = 0;
-  let paymentMethod = "cash";
+let drinksOrder = [];
+let totalPrice = 0;
+let paymentMethod = "cash";
 
-  // إضافة المخبوزات إلى البيانات
-  const drinkData = {
-    'Coffee': { image: 'images/coffee.jpg', cashPrice: 6, bankPrice: 7 },
-    'Tea': { image: 'images/tea.png', cashPrice: 4, bankPrice: 5 }
-    'Tea': { image: 'images/tea.png', cashPrice: 4, bankPrice: 5 },
-    'Croissant': { image: 'images/croissant.jpg', cashPrice: 8, bankPrice: 9 },
-    'Muffin': { image: 'images/muffin.jpg', cashPrice: 7, bankPrice: 8 },
-    'Chocolate Cake': { image: 'images/chocolate_cake.jpg', cashPrice: 12, bankPrice: 13 }
-  };
+// إضافة المشروبات والمخبوزات إلى البيانات
+const drinkData = {
+  'Coffee': { image: 'images/coffee.jpg', cashPrice: 6, bankPrice: 7 },
+  'Tea': { image: 'images/tea.png', cashPrice: 4, bankPrice: 5 },
+  'Croissant': { image: 'images/croissant.jpg', cashPrice: 8, bankPrice: 9 },
+  'Muffin': { image: 'images/muffin.jpg', cashPrice: 7, bankPrice: 8 },
+  'Chocolate Cake': { image: 'images/chocolate_cake.jpg', cashPrice: 12, bankPrice: 13 }
+};
 
-  document.getElementById("paymentMethod").addEventListener("change", function() {
-@@ -54,6 +18,7 @@ <h1>Welcome to Al-Jaru Drinks</h1>
+document.getElementById("paymentMethod").addEventListener("change", function() {
+  paymentMethod = this.value;
+  renderDrinks();
+});
+
+function addDrink() {
+  // الاختيار الافتراضي هو Coffee
+  drinksOrder.push({ id: Date.now(), drinkName: 'Coffee', sugarChoice: false, quantity: 1 });
+  renderDrinks();
+}
+
+function renderDrinks() {
+  const container = document.getElementById('addedDrinksContainer');
+  container.innerHTML = '';
+  totalPrice = 0;
+
+  drinksOrder.forEach(drink => {
+    const div = document.createElement('div');
+    div.className = 'added-drink-card';
+    const drinkImage = drinkData[drink.drinkName]?.image || 'images/default.jpg';
+
+    let optionsHtml = '';
+    for (let drinkName in drinkData) {
+      optionsHtml += `<option value="${drinkName}" ${drink.drinkName === drinkName ? 'selected' : ''}>${drinkName}</option>`;
+    }
+
+    const unitPrice = paymentMethod==="cash" ? drinkData[drink.drinkName].cashPrice : drinkData[drink.drinkName].bankPrice;
+    const itemPrice = unitPrice * drink.quantity;
+
+    div.innerHTML = `
+      <img class="drink-image" src="${drinkImage}" alt="${drink.drinkName}">
+      <select onchange="updateDrink('${drink.id}','drinkName',this.value)">${optionsHtml}</select>
+      <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}','quantity',this.value)">
+      ${drink.drinkName==='Coffee' || drink.drinkName==='Tea' ? `
+      <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
+        <option value="true" ${drink.sugarChoice===true?'selected':''}>With Sugar</option>
+        <option value="false" ${drink.sugarChoice===false?'selected':''}>Without Sugar</option>
+      </select>` : ''}
+      <p><strong>Price:</strong> ${itemPrice} ₪ (${paymentMethod})</p>
+      <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
+    `;
+    container.appendChild(div);
+    totalPrice += itemPrice;
   });
+}
 
-  function addDrink() {
-    // الاختيار الافتراضي هو Coffee
-    drinksOrder.push({ id: Date.now(), drinkName: 'Coffee', sugarChoice: false, quantity: 1 });
-    renderDrinks();
-  }
-@@ -80,10 +45,11 @@ <h1>Welcome to Al-Jaru Drinks</h1>
-        <img class="drink-image" src="${drinkImage}" alt="${drink.drinkName}">
-        <select onchange="updateDrink('${drink.id}','drinkName',this.value)">${optionsHtml}</select>
-        <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}','quantity',this.value)">
-        ${drink.drinkName==='Coffee' || drink.drinkName==='Tea' ? `
-        <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
-          <option value="true" ${drink.sugarChoice===true?'selected':''}>With Sugar</option>
-          <option value="false" ${drink.sugarChoice===false?'selected':''}>Without Sugar</option>
-        </select>
-        </select>` : ''}
-        <p><strong>Price:</strong> ${itemPrice} ₪ (${paymentMethod})</p>
-        <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
-      `;
-@@ -113,7 +79,7 @@ <h1>Welcome to Al-Jaru Drinks</h1>
-  document.getElementById('orderForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    const name = document.getElementById('customerName').value;
-    if(drinksOrder.length===0){ alert('Please add at least one drink!'); return; }
-    if(drinksOrder.length===0){ alert('Please add at least one drink or pastry!'); return; }
-
-    const [date,time] = getPalestineTime().split(", ");
-
-@@ -127,5 +93,3 @@ <h1>Welcome to Al-Jaru Drinks</h1>
-    window.location.href='order-confirmed.html';
+function updateDrink(id, field, value) {
+  drinksOrder = drinksOrder.map(drink => {
+    if(drink.id==id){
+      if(field==='drinkName'){ drink.drinkName = value; }
+      else if(field==='quantity'){ drink.quantity = Math.max(1, parseInt(value)); }
+      else if(field==='sugarChoice'){ drink.sugarChoice = (value==='true'); }
+    }
+    return drink;
   });
+  renderDrinks();
+}
+
+function deleteDrink(id){ drinksOrder = drinksOrder.filter(d => d.id != id); renderDrinks(); }
+
+function getPalestineTime(){ return new Date().toLocaleString("en-US",{timeZone:"Asia/Hebron"}); }
+
+document.getElementById('addDrinkBtn').addEventListener('click', addDrink);
+
+document.getElementById('orderForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const name = document.getElementById('customerName').value;
+  if(drinksOrder.length===0){ alert('Please add at least one drink or pastry!'); return; }
+
+  const [date,time] = getPalestineTime().split(", ");
+
+  localStorage.setItem('customerName', name);
+  localStorage.setItem('drinksOrder', JSON.stringify(drinksOrder));
+  localStorage.setItem('date', date);
+  localStorage.setItem('time', time);
+  localStorage.setItem('paymentMethod', paymentMethod);
+  localStorage.setItem('totalPrice', totalPrice);
+
+  window.location.href='order-confirmed.html';
+});
 </script>
+
 </body>
 </html>
