@@ -60,14 +60,7 @@
   document.getElementById("time").textContent = time;
   document.getElementById("totalPrice").textContent = totalPrice;
 
-  // عرض تفاصيل الطلبات مع السعر
-  const orderList = document.getElementById("orderList");
-  drinksOrder.forEach(drink=>{
-    const unitPrice = paymentMethod==="cash" ? drinkData[drink.drinkName].cashPrice : drinkData[drink.drinkName].bankPrice;
-    const li = document.createElement("li");
-    li.textContent = `${drink.quantity} × ${drink.drinkName} (${drink.sugarChoice ? "مع سكر" : "بدون سكر"}) - ${unitPrice*drink.quantity} ₪`;
-    orderList.appendChild(li);
-  });
+ window.location.href = "order-confirmed.html";
 </script>
 </body>
 </html>
