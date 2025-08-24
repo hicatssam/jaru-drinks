@@ -58,7 +58,7 @@ document.getElementById("paymentMethod").addEventListener("change", function() {
 });
 
 function addDrink() {
-  // الاختيار الافتراضي هو Coffee
+  // الاختيار الافتراضي هو Coffee، جميع الأصناف تحصل على sugarChoice
   drinksOrder.push({ id: Date.now(), drinkName: 'Coffee', sugarChoice: false, quantity: 1 });
   renderDrinks();
 }
@@ -93,6 +93,10 @@ function renderDrinks() {
       <p><strong>Price:</strong> ${itemPrice} ₪ (${paymentMethod})</p>
       <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
     `;
+
+    // لكل صنف، إذا sugarChoice غير موجود، اضبطه على false
+    if(drink.sugarChoice === undefined) drink.sugarChoice = false;
+
     container.appendChild(div);
     totalPrice += itemPrice;
   });
