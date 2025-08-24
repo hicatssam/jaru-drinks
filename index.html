@@ -1,6 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Al-Jaru Drinks Order</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: url('images/background.jpg');
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+  img { width: 120px; }
+  .container { padding: 30px; }
+  .order-form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .order-form input, .order-form select {
+    padding: 10px;
+    margin: 10px 0;
+    width: 300px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  button {
+    width: 250px;
+    background-color: #28a745;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .added-drinks-container {
+    width: max-content;
+    margin-top: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+  }
+  .added-drink-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    width: 270px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.8s ease;
+  }
+  .added-drink-card select, .added-drink-card input { margin: 5px 0; width: 90%; }
+  .delete-btn { background-color: #f44336; margin-top: 10px; }
+  .drink-image { width: 250px; height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+  @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+</style>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Order Confirmed - Al Jaru</title>
@@ -26,6 +87,31 @@
   </style>
 </head>
 <body>
+
+<header>
+  <img src="images/logo.svg.jpg" alt="Jaru Logo">
+  <h1>Welcome to Al-Jaru Drinks</h1>
+</header>
+
+<audio id="backgroundSound" autoplay loop>
+  <source src="sounds/background.mp3" type="audio/mpeg">
+</audio>
+
+<div class="container">
+  <form id="orderForm" class="order-form">
+    <input type="text" id="customerName" placeholder="Enter your name" required>
+
+    <!-- اختيار طريقة الدفع -->
+    <select id="paymentMethod">
+      <option value="cash">Cash</option>
+      <option value="bank">Bank</option>
+    </select>
+
+    <div id="addedDrinksContainer" class="added-drinks-container"></div>
+    <button type="button" id="addDrinkBtn">Add Drink</button>
+    <button type="submit">Confirm Order</button>
+  </form>
+</div>
   <div class="card">
     <h1>✅ Order Confirmed</h1>
     <p id="orderNumber"></p>
@@ -38,12 +124,117 @@
   </div>
 
 <script>
+  const backgroundSound = document.getElementById("backgroundSound");
+  let drinksOrder = [];
+  let totalPrice = 0;
+  let paymentMethod = "cash";
+
+  // بيانات المشروبات (سعر للكاش وسعر للبنك)
   // نفس بيانات الأسعار
   const drinkData = {
+    'Coffee': { image: 'images/coffee.jpg', cashPrice: 6, bankPrice: 7 },
+    'Tea': { image: 'images/tea.png', cashPrice: 4, bankPrice: 5 }
     'Coffee': { cashPrice: 6, bankPrice: 7 },
     'Tea': { cashPrice: 4, bankPrice: 5 }
   };
 
+  document.getElementById("paymentMethod").addEventListener("change", function() {
+    paymentMethod = this.value;
+    renderDrinks(); // إعادة حساب الأسعار
+  });
+
+  document.addEventListener("click", () => { backgroundSound.play().catch(e=>console.log(e)); }, {once:true});
+  window.addEventListener("beforeunload", () => { backgroundSound.pause(); backgroundSound.currentTime = 0; });
+
+  function addDrink() {
+    drinksOrder.push({ 
+      id: Date.now(), 
+      drinkName: 'Coffee', 
+      sugarChoice: false, 
+      quantity: 1
+    });
+    renderDrinks();
+  }
+
+  function getSugarLabel(sugarChoice) { 
+    return sugarChoice === true || sugarChoice==='true' ? 'With Sugar':'Without Sugar'; 
+  }
+
+  function renderDrinks() {
+    const container = document.getElementById('addedDrinksContainer');
+    container.innerHTML = '';
+    totalPrice = 0;
+
+    drinksOrder.forEach(drink => {
+      const div = document.createElement('div');
+      div.className = 'added-drink-card';
+      const drinkImage = drinkData[drink.drinkName]?.image || 'images/default.jpg';
+
+      let optionsHtml = '';
+      for (let drinkName in drinkData) {
+        optionsHtml += `<option value="${drinkName}" ${drink.drinkName === drinkName ? 'selected' : ''}>${drinkName}</option>`;
+      }
+
+      // السعر حسب طريقة الدفع
+      const unitPrice = paymentMethod==="cash" ? drinkData[drink.drinkName].cashPrice : drinkData[drink.drinkName].bankPrice;
+      const itemPrice = unitPrice * drink.quantity;
+
+      div.innerHTML = `
+        <img class="drink-image" src="${drinkImage}" alt="${drink.drinkName}">
+        <select onchange="updateDrink('${drink.id}','drinkName',this.value)">
+          ${optionsHtml}
+        </select>
+        <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}','quantity',this.value)">
+        <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
+          <option value="true" ${drink.sugarChoice===true?'selected':''}>With Sugar</option>
+          <option value="false" ${drink.sugarChoice===false?'selected':''}>Without Sugar</option>
+        </select>
+        <p><strong>Sugar:</strong> ${getSugarLabel(drink.sugarChoice)}</p>
+        <p><strong>Price:</strong> ${itemPrice} ILS (${paymentMethod})</p>
+        <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
+      `;
+
+      container.appendChild(div);
+      totalPrice += itemPrice;
+    });
+
+    localStorage.setItem('totalPrice', totalPrice);
+  }
+
+  function updateDrink(id, field, value) {
+    drinksOrder = drinksOrder.map(drink => {
+      if(drink.id==id){
+        if(field==='drinkName'){ drink.drinkName = value; }
+        else if(field==='quantity'){ drink.quantity = Math.max(1, parseInt(value)); }
+        else if(field==='sugarChoice'){ drink.sugarChoice = (value==='true'); }
+      }
+      return drink;
+    });
+    renderDrinks();
+  }
+
+  function deleteDrink(id){ drinksOrder = drinksOrder.filter(d => d.id != id); renderDrinks(); }
+
+  function getPalestineTime(){ return new Date().toLocaleString("en-US",{timeZone:"Asia/Hebron"}); }
+
+  document.getElementById('addDrinkBtn').addEventListener('click', addDrink);
+
+  document.getElementById('orderForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.getElementById('customerName').value;
+    if(drinksOrder.length===0){ alert('Please add at least one drink!'); return; }
+
+    const [date,time] = getPalestineTime().split(", ");
+
+    localStorage.setItem('customerName', name);
+    localStorage.setItem('drinksOrder', JSON.stringify(drinksOrder));
+    localStorage.setItem('date', date);
+    localStorage.setItem('time', time);
+    localStorage.setItem('paymentMethod', paymentMethod);
+    localStorage.setItem('totalPrice', totalPrice);
+
+    console.log("Order saved locally!");
+    window.location.href='order-confirmed.html';
   const customerName = localStorage.getItem('customerName');
   const drinksOrder = JSON.parse(localStorage.getItem('drinksOrder') || "[]");
   const totalPrice = localStorage.getItem('totalPrice');
@@ -60,7 +251,15 @@
   document.getElementById("time").textContent = time;
   document.getElementById("totalPrice").textContent = totalPrice;
 
- window.location.href = "order-confirmed.html";
+  // عرض تفاصيل الطلبات مع السعر
+  const orderList = document.getElementById("orderList");
+  drinksOrder.forEach(drink=>{
+    const unitPrice = paymentMethod==="cash" ? drinkData[drink.drinkName].cashPrice : drinkData[drink.drinkName].bankPrice;
+    const li = document.createElement("li");
+    li.textContent = `${drink.quantity} × ${drink.drinkName} (${drink.sugarChoice ? "مع سكر" : "بدون سكر"}) - ${unitPrice*drink.quantity} ₪`;
+    orderList.appendChild(li);
+  });
 </script>
+
 </body>
 </html>
