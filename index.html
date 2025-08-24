@@ -1,61 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Al-Jaru Order</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: url('images/background.jpg'); margin: 0; padding: 0; text-align: center; }
-    img { width: 120px; }
-    .container { padding: 30px; }
-    .order-form { margin-top: 20px; display: flex; flex-direction: column; align-items: center; }
-    .order-form input, .order-form select { padding: 10px; margin: 10px 0; width: 300px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; }
-    button { width: 250px; background-color: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-    .added-drinks-container { width: max-content; margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
-    .added-drink-card { background: #fff; padding: 15px; border-radius: 8px; width: 270px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.8s ease; }
-    .added-drink-card select, .added-drink-card input { margin: 5px 0; width: 90%; }
-    .delete-btn { background-color: #f44336; margin-top: 10px; }
-    .drink-image { width: 250px; height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
-    @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Al-Jaru Order</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: url('images/background.jpg');
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  position: relative;
+}
+img { width: 120px; }
+.container { padding: 30px; }
+.order-form { margin-top: 20px; display: flex; flex-direction: column; align-items: center; }
+.order-form input, .order-form select { padding: 10px; margin: 10px 0; width: 300px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; }
+button { width: 250px; background-color: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+.added-drinks-container { width: max-content; margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.added-drink-card { background: #fff; padding: 15px; border-radius: 8px; width: 270px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.8s ease; }
+.added-drink-card select, .added-drink-card input { margin: 5px 0; width: 90%; }
+.delete-btn { background-color: #f44336; margin-top: 10px; }
+.drink-image { width: 250px; height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+@keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+
+/* زر السماعة */
+.audio-toggle {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  background-color: #ffcc00;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+.audio-toggle:hover {
+  background-color: #ffc107;
+}
+.audio-muted {
+  color: #ff0000;
+}
+.audio-playing {
+  color: #006600;
+}
+</style>
 </head>
 <body>
 
-  <audio id="backgroundAudio" autoplay loop>
+<audio id="backgroundAudio" autoplay loop>
   <source src="sounds/background.mp3" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
   
-  <header>
-    <img src="images/logo.svg.jpg" alt="Jaru Logo">
-    <h1>Welcome to Al-Jaru Space</h1>
-  </header>
+<header>
+  <img src="images/logo.svg.jpg" alt="Jaru Logo">
+  <h1>Welcome to Al-Jaru Space</h1>
+</header>
 
-  <div class="container">
-    <form id="orderForm" class="order-form">
-      <input type="text" id="customerName" placeholder="Enter your name" required>
-      <select id="paymentMethod">
-        <option value="cash">Cash</option>
-        <option value="bank">Bank</option>
-      </select>
-      <div id="addedDrinksContainer" class="added-drinks-container"></div>
-      <button type="button" id="addDrinkBtn">Add Order</button>
-      <button type="submit">Confirm Order</button>
-    </form>
-  </div>
+<div class="container">
+  <form id="orderForm" class="order-form">
+    <input type="text" id="customerName" placeholder="Enter your name" required>
+    <select id="paymentMethod">
+      <option value="cash">Cash</option>
+      <option value="bank">Bank</option>
+    </select>
+    <div id="addedDrinksContainer" class="added-drinks-container"></div>
+    <button type="button" id="addDrinkBtn">Add Order</button>
+    <button type="submit">Confirm Order</button>
+  </form>
+</div>
 
-  <button onclick="toggleAudio()">🔊 Play/Pause Music</button>
+<!-- زر السماعة -->
+<button id="audioBtn" class="audio-toggle audio-playing">🔊</button>
 
 <script>
 let drinksOrder = [];
 let totalPrice = 0;
 let paymentMethod = "cash";
 
-// إضافة المشروبات والمخبوزات إلى البيانات
 const drinkData = {
   'Coffee': { image: 'images/coffee.jpg', cashPrice: 6, bankPrice: 7 },
   'Tea': { image: 'images/tea.png', cashPrice: 4, bankPrice: 5 },
   'sinabone': { image: 'images/sinabone.png', cashPrice: 8, bankPrice: 9 },
+  
 };
 
 document.getElementById("paymentMethod").addEventListener("change", function() {
@@ -64,7 +100,6 @@ document.getElementById("paymentMethod").addEventListener("change", function() {
 });
 
 function addDrink() {
-  // الاختيار الافتراضي هو Coffee، جميع الأصناف تحصل على sugarChoice
   drinksOrder.push({ id: Date.now(), drinkName: 'Coffee', sugarChoice: false, quantity: 1 });
   renderDrinks();
 }
@@ -100,7 +135,6 @@ function renderDrinks() {
       <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
     `;
 
-    // لكل صنف، إذا sugarChoice غير موجود، اضبطه على false
     if(drink.sugarChoice === undefined) drink.sugarChoice = false;
 
     container.appendChild(div);
@@ -108,11 +142,23 @@ function renderDrinks() {
   });
 }
 
-  function toggleAudio(){
-  const audio = document.getElementById('backgroundAudio');
-  if(audio.paused){ audio.play(); }
-  else{ audio.pause(); }
-}
+// زر السماعة
+const audio = document.getElementById('backgroundAudio');
+const audioBtn = document.getElementById('audioBtn');
+
+audioBtn.addEventListener('click', function(){
+  if(audio.paused){
+    audio.play();
+    audioBtn.textContent = '🔊';
+    audioBtn.classList.remove('audio-muted');
+    audioBtn.classList.add('audio-playing');
+  } else {
+    audio.pause();
+    audioBtn.textContent = '🔇';
+    audioBtn.classList.remove('audio-playing');
+    audioBtn.classList.add('audio-muted');
+  }
+});
 
 function updateDrink(id, field, value) {
   drinksOrder = drinksOrder.map(drink => {
