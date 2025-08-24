@@ -1,51 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Al-Jaru Drinks Order</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: url('images/background.jpg'); margin: 0; padding: 0; text-align: center; }
-    img { width: 120px; }
-    .container { padding: 30px; }
-    .order-form { margin-top: 20px; display: flex; flex-direction: column; align-items: center; }
-    .order-form input, .order-form select { padding: 10px; margin: 10px 0; width: 300px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; }
-    button { width: 250px; background-color: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-    .added-drinks-container { width: max-content; margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
-    .added-drink-card { background: #fff; padding: 15px; border-radius: 8px; width: 270px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.8s ease; }
-    .added-drink-card select, .added-drink-card input { margin: 5px 0; width: 90%; }
-    .delete-btn { background-color: #f44336; margin-top: 10px; }
-    .drink-image { width: 250px; height: 250px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
-    @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
-  </style>
-</head>
-<body>
-  <header>
-    <img src="images/logo.svg.jpg" alt="Jaru Logo">
-    <h1>Welcome to Al-Jaru Drinks</h1>
-  </header>
-
-  <div class="container">
-    <form id="orderForm" class="order-form">
-      <input type="text" id="customerName" placeholder="Enter your name" required>
-      <select id="paymentMethod">
-        <option value="cash">Cash</option>
-        <option value="bank">Bank</option>
-      </select>
-      <div id="addedDrinksContainer" class="added-drinks-container"></div>
-      <button type="button" id="addDrinkBtn">Add Drink</button>
-      <button type="submit">Confirm Order</button>
-    </form>
-  </div>
-
 <script>
   let drinksOrder = [];
   let totalPrice = 0;
   let paymentMethod = "cash";
 
+  // إضافة المخبوزات إلى البيانات
   const drinkData = {
     'Coffee': { image: 'images/coffee.jpg', cashPrice: 6, bankPrice: 7 },
-    'Tea': { image: 'images/tea.png', cashPrice: 4, bankPrice: 5 }
+    'Tea': { image: 'images/tea.png', cashPrice: 4, bankPrice: 5 },
+    'Croissant': { image: 'images/croissant.jpg', cashPrice: 8, bankPrice: 9 },
+    'Muffin': { image: 'images/muffin.jpg', cashPrice: 7, bankPrice: 8 },
+    'Chocolate Cake': { image: 'images/chocolate_cake.jpg', cashPrice: 12, bankPrice: 13 }
   };
 
   document.getElementById("paymentMethod").addEventListener("change", function() {
@@ -54,6 +18,7 @@
   });
 
   function addDrink() {
+    // الاختيار الافتراضي هو Coffee
     drinksOrder.push({ id: Date.now(), drinkName: 'Coffee', sugarChoice: false, quantity: 1 });
     renderDrinks();
   }
@@ -80,10 +45,11 @@
         <img class="drink-image" src="${drinkImage}" alt="${drink.drinkName}">
         <select onchange="updateDrink('${drink.id}','drinkName',this.value)">${optionsHtml}</select>
         <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}','quantity',this.value)">
+        ${drink.drinkName==='Coffee' || drink.drinkName==='Tea' ? `
         <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
           <option value="true" ${drink.sugarChoice===true?'selected':''}>With Sugar</option>
           <option value="false" ${drink.sugarChoice===false?'selected':''}>Without Sugar</option>
-        </select>
+        </select>` : ''}
         <p><strong>Price:</strong> ${itemPrice} ₪ (${paymentMethod})</p>
         <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
       `;
@@ -113,7 +79,7 @@
   document.getElementById('orderForm').addEventListener('submit', function(e){
     e.preventDefault();
     const name = document.getElementById('customerName').value;
-    if(drinksOrder.length===0){ alert('Please add at least one drink!'); return; }
+    if(drinksOrder.length===0){ alert('Please add at least one drink or pastry!'); return; }
 
     const [date,time] = getPalestineTime().split(", ");
 
@@ -127,5 +93,3 @@
     window.location.href='order-confirmed.html';
   });
 </script>
-</body>
-</html>
