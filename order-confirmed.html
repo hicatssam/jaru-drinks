@@ -1,58 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Order Confirmed - Al Jaru</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: url('images/background.jpg'); margin: 0; padding: 20px; text-align: center; }
-    .card { background: #fff; border-radius: 12px; padding: 20px; max-width: 600px; margin: auto; box-shadow: 0 0 12px rgba(0,0,0,0.1); }
-    h1 { color: green; }
-    ul { list-style: none; padding: 0; }
-    li { margin: 10px 0; font-size: 18px; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Order Confirmed - Al Jaru</title>
+<style>
+  body { font-family: Arial, sans-serif; background: url('images/background.jpg'); margin: 0; padding: 20px; text-align: center; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; max-width: 600px; margin: auto; box-shadow: 0 0 12px rgba(0,0,0,0.1); }
+  h1 { color: green; }
+  ul { list-style: none; padding: 0; }
+  li { margin: 10px 0; font-size: 18px; }
+  #timer { font-size: 20px; color: red; margin: 10px 0; }
+  #cancelBtn { padding: 10px 20px; background-color: #f44336; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+</style>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <div class="card">
-    <h1>✅ Order Confirmed</h1>
+    <h1>✅ Order Confirmation</h1>
     <p id="orderNumber"></p>
     <p id="customerName"></p>
-    <h3>الطلبات:</h3>
+    <h3>Orders:</h3>
     <ul id="orderList"></ul>
-    <p><strong>المجموع:</strong> <span id="totalPrice"></span> ₪</p>
-    <p><strong>طريقة الدفع:</strong> <span id="paymentMethod"></span></p>
-    <p><strong>التاريخ:</strong> <span id="date"></span> <span id="time"></span></p>
+    <p><strong>Total:</strong> <span id="totalPrice"></span> ₪</p>
+    <p><strong>Payment:</strong> <span id="paymentMethod"></span></p>
+    <p><strong>Date:</strong> <span id="date"></span> <span id="time"></span></p>
+    <p id="timer">10</p>
+    <button id="cancelBtn">Cancel Order</button>
   </div>
 
 <script>
-  const drinkData = {
-    'Coffee': { cashPrice: 6, bankPrice: 7 },
-    'Tea': { cashPrice: 4, bankPrice: 5 }
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
   };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
+  // بيانات الطلب من localStorage
+  const drinkData = { 'Coffee': {cashPrice:6, bankPrice:7}, 'Tea':{cashPrice:4, bankPrice:5} };
   const customerName = localStorage.getItem('customerName');
-  const drinksOrder = JSON.parse(localStorage.getItem('drinksOrder') || "[]");
+  const drinksOrder = JSON.parse(localStorage.getItem('drinksOrder')||"[]");
   const totalPrice = localStorage.getItem('totalPrice');
   const date = localStorage.getItem('date');
   const time = localStorage.getItem('time');
   const paymentMethod = localStorage.getItem('paymentMethod');
-  let orderNumber = parseInt(localStorage.getItem("lastOrderNumber") || "0") + 1;
+  let orderNumber = parseInt(localStorage.getItem("lastOrderNumber")||"0")+1;
   localStorage.setItem("lastOrderNumber", orderNumber);
 
-  document.getElementById("orderNumber").textContent = `طلب رقم #${orderNumber}`;
-  document.getElementById("customerName").textContent = `الاسم: ${customerName}`;
-  document.getElementById("paymentMethod").textContent = paymentMethod==="cash" ? "كاش" : "بنك";
+  document.getElementById("orderNumber").textContent = `Order #${orderNumber}`;
+  document.getElementById("customerName").textContent = `Name: ${customerName}`;
+  document.getElementById("paymentMethod").textContent = paymentMethod==="cash"?"Cash":"Bank";
   document.getElementById("date").textContent = date;
   document.getElementById("time").textContent = time;
   document.getElementById("totalPrice").textContent = totalPrice;
 
   const orderList = document.getElementById("orderList");
   drinksOrder.forEach(drink=>{
-    const unitPrice = paymentMethod==="cash" ? drinkData[drink.drinkName].cashPrice : drinkData[drink.drinkName].bankPrice;
+    const unitPrice = paymentMethod==="cash"?drinkData[drink.drinkName].cashPrice:drinkData[drink.drinkName].bankPrice;
     const li = document.createElement("li");
-    li.textContent = `${drink.quantity} × ${drink.drinkName} (${drink.sugarChoice ? "مع سكر" : "بدون سكر"}) - ${unitPrice*drink.quantity} ₪`;
+    li.textContent = `${drink.quantity} × ${drink.drinkName} (${drink.sugarChoice?"With Sugar":"Without Sugar"}) - ${unitPrice*drink.quantity} ₪`;
     orderList.appendChild(li);
   });
+
+  // تايمر 10 ثواني
+  let timeLeft = 10;
+  const timerEl = document.getElementById("timer");
+  let timer = setInterval(()=>{
+    timeLeft--;
+    timerEl.textContent = timeLeft;
+    if(timeLeft <=0){
+      clearInterval(timer);
+      saveOrderToFirebase();
+    }
+  },1000);
+
+  // الغاء الطلب
+  document.getElementById("cancelBtn").addEventListener("click",()=>{
+    clearInterval(timer);
+    alert("Order Cancelled!");
+    window.location.href="index.html";
+  });
+
+  function saveOrderToFirebase(){
+    const orderRef = db.ref("orders/"+orderNumber);
+    orderRef.set({
+      orderNumber,
+      customerName,
+      drinksOrder,
+      totalPrice,
+      paymentMethod,
+      date,
+      time
+    }).then(()=>{
+      alert("Order Saved Successfully!");
+    }).catch(err=>console.error(err));
+  }
 </script>
 </body>
 </html>
