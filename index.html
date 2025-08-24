@@ -77,6 +77,13 @@
 <div class="container">
   <form id="orderForm" class="order-form">
     <input type="text" id="customerName" placeholder="Enter your name" required>
+
+    <!-- اختيار طريقة الدفع -->
+    <select id="paymentMethod">
+      <option value="cash">Cash</option>
+      <option value="bank">Bank</option>
+    </select>
+
     <div id="addedDrinksContainer" class="added-drinks-container"></div>
     <button type="button" id="addDrinkBtn">Add Drink</button>
     <button type="submit">Confirm Order</button>
@@ -84,28 +91,31 @@
 </div>
 
 <script>
-  // Variables
   const backgroundSound = document.getElementById("backgroundSound");
   let drinksOrder = [];
   let totalPrice = 0;
+  let paymentMethod = "cash";
 
-  // الصور والأسعار لكل مشروب
+  // بيانات المشروبات (سعر للكاش وسعر للبنك)
   const drinkData = {
-    'Coffee': { image: 'images/coffee.jpg', price: 6 },
-    'Tea': { image: 'images/tea.png', price: 4 }
+    'Coffee': { image: 'images/coffee.jpg', cashPrice: 6, bankPrice: 7 },
+    'Tea': { image: 'images/tea.png', cashPrice: 4, bankPrice: 5 }
   };
+
+  document.getElementById("paymentMethod").addEventListener("change", function() {
+    paymentMethod = this.value;
+    renderDrinks(); // إعادة حساب الأسعار
+  });
 
   document.addEventListener("click", () => { backgroundSound.play().catch(e=>console.log(e)); }, {once:true});
   window.addEventListener("beforeunload", () => { backgroundSound.pause(); backgroundSound.currentTime = 0; });
 
-  // إضافة مشروب جديد
   function addDrink() {
     drinksOrder.push({ 
       id: Date.now(), 
       drinkName: 'Coffee', 
       sugarChoice: false, 
-      quantity: 1, 
-      price: drinkData['Coffee'].price
+      quantity: 1
     });
     renderDrinks();
   }
@@ -114,95 +124,77 @@
     return sugarChoice === true || sugarChoice==='true' ? 'With Sugar':'Without Sugar'; 
   }
 
-// عرض المشروبات المضافة
-function renderDrinks() {
-  const container = document.getElementById('addedDrinksContainer');
-  container.innerHTML = '';
-  totalPrice = 0;
+  function renderDrinks() {
+    const container = document.getElementById('addedDrinksContainer');
+    container.innerHTML = '';
+    totalPrice = 0;
 
-  drinksOrder.forEach(drink => {
-    const div = document.createElement('div');
-    div.className = 'added-drink-card';
-    const drinkImage = drinkData[drink.drinkName]?.image || 'images/default.jpg';
+    drinksOrder.forEach(drink => {
+      const div = document.createElement('div');
+      div.className = 'added-drink-card';
+      const drinkImage = drinkData[drink.drinkName]?.image || 'images/default.jpg';
 
-    // توليد خيارات select تلقائيًا
-    let optionsHtml = '';
-    for (let drinkName in drinkData) {
-      optionsHtml += `<option value="${drinkName}" ${drink.drinkName === drinkName ? 'selected' : ''}>${drinkName}</option>`;
-    }
+      let optionsHtml = '';
+      for (let drinkName in drinkData) {
+        optionsHtml += `<option value="${drinkName}" ${drink.drinkName === drinkName ? 'selected' : ''}>${drinkName}</option>`;
+      }
 
-    div.innerHTML = `
-      <img class="drink-image" src="${drinkImage}" alt="${drink.drinkName}">
-      <select onchange="updateDrink('${drink.id}','drinkName',this.value)">
-        ${optionsHtml}
-      </select>
-      <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}','quantity',this.value)">
-      <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
-        <option value="true" ${drink.sugarChoice===true?'selected':''}>With Sugar</option>
-        <option value="false" ${drink.sugarChoice===false?'selected':''}>Without Sugar</option>
-      </select>
-      <p><strong>Sugar:</strong> ${getSugarLabel(drink.sugarChoice)}</p>
-      <p><strong>Price:</strong> ${drink.price*drink.quantity} ILS</p>
-      <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
-    `;
+      // السعر حسب طريقة الدفع
+      const unitPrice = paymentMethod==="cash" ? drinkData[drink.drinkName].cashPrice : drinkData[drink.drinkName].bankPrice;
+      const itemPrice = unitPrice * drink.quantity;
 
-    container.appendChild(div);
-    totalPrice += drink.price*drink.quantity;
-  });
+      div.innerHTML = `
+        <img class="drink-image" src="${drinkImage}" alt="${drink.drinkName}">
+        <select onchange="updateDrink('${drink.id}','drinkName',this.value)">
+          ${optionsHtml}
+        </select>
+        <input type="number" min="1" value="${drink.quantity}" onchange="updateDrink('${drink.id}','quantity',this.value)">
+        <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
+          <option value="true" ${drink.sugarChoice===true?'selected':''}>With Sugar</option>
+          <option value="false" ${drink.sugarChoice===false?'selected':''}>Without Sugar</option>
+        </select>
+        <p><strong>Sugar:</strong> ${getSugarLabel(drink.sugarChoice)}</p>
+        <p><strong>Price:</strong> ${itemPrice} ILS (${paymentMethod})</p>
+        <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
+      `;
 
-  localStorage.setItem('totalPrice', totalPrice);
-}
+      container.appendChild(div);
+      totalPrice += itemPrice;
+    });
 
+    localStorage.setItem('totalPrice', totalPrice);
+  }
 
-  // تعديل مشروب
   function updateDrink(id, field, value) {
     drinksOrder = drinksOrder.map(drink => {
       if(drink.id==id){
-        if(field==='drinkName'){ 
-          drink.drinkName = value; 
-          drink.price = drinkData[value].price; 
-        }
-        else if(field==='quantity'){ 
-          drink.quantity = Math.max(1, parseInt(value)); 
-        }
-        else if(field==='sugarChoice'){ 
-          drink.sugarChoice = (value==='true'); 
-        }
+        if(field==='drinkName'){ drink.drinkName = value; }
+        else if(field==='quantity'){ drink.quantity = Math.max(1, parseInt(value)); }
+        else if(field==='sugarChoice'){ drink.sugarChoice = (value==='true'); }
       }
       return drink;
     });
     renderDrinks();
   }
 
-  // حذف مشروب
-  function deleteDrink(id){ 
-    drinksOrder = drinksOrder.filter(d => d.id != id); 
-    renderDrinks(); 
-  }
+  function deleteDrink(id){ drinksOrder = drinksOrder.filter(d => d.id != id); renderDrinks(); }
 
-  function getPalestineTime(){ 
-    return new Date().toLocaleString("en-US",{timeZone:"Asia/Hebron"}); 
-  }
+  function getPalestineTime(){ return new Date().toLocaleString("en-US",{timeZone:"Asia/Hebron"}); }
 
-  // زر إضافة مشروب
   document.getElementById('addDrinkBtn').addEventListener('click', addDrink);
 
-  // حفظ الطلب
   document.getElementById('orderForm').addEventListener('submit', function(e){
     e.preventDefault();
     const name = document.getElementById('customerName').value;
-    if(drinksOrder.length===0){ 
-      alert('Please add at least one drink!'); 
-      return; 
-    }
+    if(drinksOrder.length===0){ alert('Please add at least one drink!'); return; }
 
     const [date,time] = getPalestineTime().split(", ");
 
-    // حفظ البيانات محليًا فقط
     localStorage.setItem('customerName', name);
     localStorage.setItem('drinksOrder', JSON.stringify(drinksOrder));
     localStorage.setItem('date', date);
     localStorage.setItem('time', time);
+    localStorage.setItem('paymentMethod', paymentMethod);
     localStorage.setItem('totalPrice', totalPrice);
 
     console.log("Order saved locally!");
