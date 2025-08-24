@@ -20,6 +20,12 @@
   </style>
 </head>
 <body>
+
+  <audio id="backgroundAudio" autoplay loop>
+  <source src="sounds/background-music.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+  
   <header>
     <img src="images/logo.svg.jpg" alt="Jaru Logo">
     <h1>Welcome to Al-Jaru Drinks</h1>
@@ -37,6 +43,8 @@
       <button type="submit">Confirm Order</button>
     </form>
   </div>
+
+  <button onclick="toggleAudio()">🔊 Play/Pause Music</button>
 
 <script>
 let drinksOrder = [];
@@ -100,6 +108,12 @@ function renderDrinks() {
     container.appendChild(div);
     totalPrice += itemPrice;
   });
+}
+
+  function toggleAudio(){
+  const audio = document.getElementById('backgroundAudio');
+  if(audio.paused){ audio.play(); }
+  else{ audio.pause(); }
 }
 
 function updateDrink(id, field, value) {
