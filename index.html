@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -12,8 +13,6 @@
     --danger:#f44336;
     --muted:#9ca3af;
     --accent:#ffcc00;
-    --cash:#f59e0b; /* برتقالي */
-    --bank:#3b82f6; /* أزرق */
   }
   *{box-sizing:border-box}
   body {
@@ -27,35 +26,64 @@
   .container { padding: 20px 12px 40px; display:flex; justify-content:center }
   .order-form { width: 100%; max-width: 780px; margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap:12px }
   .order-form input{ padding: 12px 14px; width: min(90vw, 360px); font-size: 16px; border: 1px solid #e5e7eb; border-radius: 12px; outline:none }
-  .order-form input:focus{border-color:#a7f3d0; box-shadow:0 0 0 3px rgba(16,185,129,.15)}/* Payment toggle */ .pay-toggle{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:center; margin: 6px 0 4px} .pay-btn{border:1px solid #e5e7eb; padding:10px 16px; border-radius:999px; cursor:pointer; background:#fff; min-width:120px; font-weight:600; transition:all .2s; color:#fff } .pay-btn:hover{transform:translateY(-1px)} .pay-btn.cash.active{background: var(--cash); border-color: var(--cash); box-shadow:0 6px 20px rgba(245,158,11,.3)} .pay-btn.bank.active{background: var(--bank); border-color: var(--bank); box-shadow:0 6px 20px rgba(59,130,246,.3)}
+  .order-form input:focus{border-color:#a7f3d0; box-shadow:0 0 0 3px rgba(16,185,129,.15)}
 
-/* Cards */ .added-drinks-container { width: min(100%, 900px); margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; justify-content: center; } .added-drink-card { background: var(--card); padding: 16px; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.5s ease; } .added-drink-card select, .added-drink-card input { margin: 6px 0; width: 100%; padding:10px; border:1px solid #e5e7eb; border-radius:10px } .delete-btn { background-color: var(--danger); color:#fff; border: none; border-radius: 10px; padding: 10px 16px; cursor: pointer; margin-top: 10px; width: 100%; font-weight:700 } .primary-btn{ width: min(90vw, 320px); background-color: var(--primary); color: #fff; padding: 12px 18px; border: none; border-radius: 12px; cursor: pointer; margin-top: 8px; font-size:16px; font-weight:700; box-shadow:0 10px 25px rgba(40,167,69,.25)} .secondary-btn{ width: min(90vw, 320px); background-color: #111827; color: #fff; padding: 12px 18px; border: none; border-radius: 12px; cursor: pointer; margin-top: 4px; font-size:16px; font-weight:700 }
+  /* Payment toggle */
+  .pay-toggle{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:center; margin: 6px 0 4px}
+  .pay-label{font-weight:700; font-size:14px; letter-spacing:.4px}
+  .pay-btn{border:1px solid #e5e7eb; padding:10px 16px; border-radius:999px; cursor:pointer; background:#fff; min-width:120px; font-weight:600; transition:all .2s}
+  .pay-btn:hover{transform:translateY(-1px)}
+  .pay-btn.active{background: var(--primary); color:#fff; border-color: var(--primary); box-shadow:0 6px 20px rgba(40,167,69,.25)}
 
-.drink-image { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; } @keyframes fadeIn { from {opacity: 0; transform: translateY(8px);} to {opacity: 1; transform: translateY(0);} }
+  /* Cards */
+  .added-drinks-container { width: min(100%, 900px); margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; justify-content: center; }
+  .added-drink-card { background: var(--card); padding: 16px; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.5s ease; }
+  .added-drink-card select, .added-drink-card input { margin: 6px 0; width: 100%; padding:10px; border:1px solid #e5e7eb; border-radius:10px }
+  .delete-btn { background-color: var(--danger); color:#fff; border: none; border-radius: 10px; padding: 10px 16px; cursor: pointer; margin-top: 10px; width: 100%; font-weight:700 }
+  .primary-btn{ width: min(90vw, 320px); background-color: var(--primary); color: #fff; padding: 12px 18px; border: none; border-radius: 12px; cursor: pointer; margin-top: 8px; font-size:16px; font-weight:700; box-shadow:0 10px 25px rgba(40,167,69,.25)}
+  .secondary-btn{ width: min(90vw, 320px); background-color: #111827; color: #fff; padding: 12px 18px; border: none; border-radius: 12px; cursor: pointer; margin-top: 4px; font-size:16px; font-weight:700 }
 
-/* Audio FAB */ .audio-toggle { position: fixed; left: 20px; bottom: 20px; background-color: var(--accent); border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 28px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; transition: transform 0.2s, background-color 0.3s; } .audio-toggle:hover { transform: translateY(-2px); } .audio-muted { color: #ff0000; } .audio-playing { color: #006600; } </style>
+  .drink-image { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; }
+  @keyframes fadeIn { from {opacity: 0; transform: translateY(8px);} to {opacity: 1; transform: translateY(0);} }
 
+  /* Audio FAB */
+  .audio-toggle { position: fixed; left: 20px; bottom: 20px; background-color: var(--accent); border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 28px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; transition: transform 0.2s, background-color 0.3s; }
+  .audio-toggle:hover { transform: translateY(-2px); }
+  .audio-muted { color: #ff0000; }
+  .audio-playing { color: #006600; }
+</style>
 </head>
-<body><audio id="backgroundAudio" autoplay loop>
+<body>
+
+<audio id="backgroundAudio" autoplay loop>
   <source src="sounds/background.mp3" type="audio/mpeg">
   Your browser does not support the audio element.
-</audio><header>
+</audio>
+  
+<header>
   <img src="images/logo.svg.jpg" alt="Jaru Logo">
   <h1>Welcome to Al-Jaru Space</h1>
-</header><div class="container">
+</header>
+
+<div class="container">
   <form id="orderForm" class="order-form">
-    <input type="text" id="customerName" placeholder="Enter your name" required><!-- Payment as nice buttons -->
-<div class="pay-toggle" role="group" aria-label="Payment method">
-  <button type="button" id="btnCash" class="pay-btn cash active" data-method="cash">Cash</button>
-  <button type="button" id="btnBank" class="pay-btn bank" data-method="bank">Bank</button>
+    <input type="text" id="customerName" placeholder="Enter your name" required>
+
+    <!-- Payment as nice buttons -->
+    <div class="pay-toggle" role="group" aria-label="Payment method">
+      <span class="pay-label">Payment:</span>
+      <button type="button" id="btnCash" class="pay-btn active" data-method="cash">Cash</button>
+      <button type="button" id="btnBank" class="pay-btn" data-method="bank">Bank</button>
+    </div>
+
+    <div id="addedDrinksContainer" class="added-drinks-container"></div>
+    <button type="button" id="addDrinkBtn" class="primary-btn">Add Order</button>
+    <button type="submit" class="secondary-btn">Confirm Order</button>
+  </form>
 </div>
 
-<div id="addedDrinksContainer" class="added-drinks-container"></div>
-<button type="button" id="addDrinkBtn" class="primary-btn">Add Order</button>
-<button type="submit" class="secondary-btn">Confirm Order</button>
-
-  </form>
-</div><!-- Audio FAB --><button id="audioBtn" class="audio-toggle audio-playing" aria-label="Toggle background audio">🔊</button>
+<!-- Audio FAB -->
+<button id="audioBtn" class="audio-toggle audio-playing" aria-label="Toggle background audio">🔊</button>
 
 <script>
   let drinksOrder = [];
@@ -110,4 +138,71 @@
         ${drink.drinkName==='Coffee' || drink.drinkName==='Tea' ? `
         <select onchange="updateDrink('${drink.id}','sugarChoice',this.value)">
           <option value="true" ${drink.sugarChoice===true?'selected':''}>With Sugar</option>
-          <option value="false
+          <option value="false" ${drink.sugarChoice===false?'selected':''}>Without Sugar</option>
+        </select>` : ''}
+        <p><strong>Price:</strong> ${itemPrice} ₪ (${paymentMethod})</p>
+        <button type="button" class="delete-btn" onclick="deleteDrink('${drink.id}')">Delete</button>
+      `;
+
+      if(drink.sugarChoice === undefined) drink.sugarChoice = false;
+
+      container.appendChild(div);
+      totalPrice += itemPrice;
+    });
+  }
+
+  // Audio button
+  const audio = document.getElementById('backgroundAudio');
+  const audioBtn = document.getElementById('audioBtn');
+  audioBtn.addEventListener('click', function(){
+    if(audio.paused){
+      audio.play();
+      audioBtn.textContent = '🔊';
+      audioBtn.classList.remove('audio-muted');
+      audioBtn.classList.add('audio-playing');
+    } else {
+      audio.pause();
+      audioBtn.textContent = '🔇';
+      audioBtn.classList.remove('audio-playing');
+      audioBtn.classList.add('audio-muted');
+    }
+  });
+
+  function updateDrink(id, field, value) {
+    drinksOrder = drinksOrder.map(drink => {
+      if(drink.id==id){
+        if(field==='drinkName'){ drink.drinkName = value; }
+        else if(field==='quantity'){ drink.quantity = Math.max(1, parseInt(value)); }
+        else if(field==='sugarChoice'){ drink.sugarChoice = (value==='true'); }
+      }
+      return drink;
+    });
+    renderDrinks();
+  }
+
+  function deleteDrink(id){ drinksOrder = drinksOrder.filter(d => d.id != id); renderDrinks(); }
+
+  function getPalestineTime(){ return new Date().toLocaleString("en-US",{timeZone:"Asia/Hebron"}); }
+
+  document.getElementById('addDrinkBtn').addEventListener('click', addDrink);
+
+  document.getElementById('orderForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.getElementById('customerName').value;
+    if(drinksOrder.length===0){ alert('Please add at least one drink or pastry!'); return; }
+
+    const [date,time] = getPalestineTime().split(", ");
+
+    localStorage.setItem('customerName', name);
+    localStorage.setItem('drinksOrder', JSON.stringify(drinksOrder));
+    localStorage.setItem('date', date);
+    localStorage.setItem('time', time);
+    localStorage.setItem('paymentMethod', paymentMethod);
+    localStorage.setItem('totalPrice', totalPrice);
+
+    window.location.href='order-confirmed.html';
+  });
+</script>
+
+</body>
+</html>
