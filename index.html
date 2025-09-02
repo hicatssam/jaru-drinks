@@ -55,7 +55,7 @@
 </head>
 <body>
 
-<audio id="backgroundAudio" autoplay loop>
+<audio id="backgroundAudio" autoplay loop muted>
   <source src="sounds/background.mp3" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
@@ -154,6 +154,18 @@
   // Audio button
   const audio = document.getElementById('backgroundAudio');
   const audioBtn = document.getElementById('audioBtn');
+  
+  // Attempt to play automatically when page loads
+  window.addEventListener('load', () => {
+    audio.muted = false;
+    const playPromise = audio.play();
+    if(playPromise !== undefined){
+      playPromise.catch(err => {
+        console.log('Autoplay prevented:', err);
+      });
+    }
+  });
+
   audioBtn.addEventListener('click', function(){
     if(audio.paused){
       audio.play();
