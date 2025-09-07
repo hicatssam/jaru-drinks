@@ -70,31 +70,23 @@ const timerElement = document.getElementById('timer');
 const customerName = localStorage.getItem('customerName') || '';
 const drinksOrder = JSON.parse(localStorage.getItem('drinksOrder') || '[]');
 const paymentMethod = localStorage.getItem('paymentMethod') || 'cash';
-
-const drinkData = { 
-  'Coffee': {cashPrice:6, bankPrice:7}, 
-  'Tea': {cashPrice:4, bankPrice:5},
-  'Croissant': {cashPrice:8, bankPrice:9},
-  'Muffin': {cashPrice:7, bankPrice:8},
-  'Chocolate Cake': {cashPrice:12, bankPrice:13}
-};
+const totalPrice = localStorage.getItem('totalPrice') || 0;
 
 document.getElementById('customerName').textContent = customerName;
 
-let total = 0;
+// Build summary
 let drinkSummary = '';
 drinksOrder.forEach(d => {
-  const unitPrice = drinkData[d.drinkName] ? (paymentMethod === 'cash' ? drinkData[d.drinkName].cashPrice : drinkData[d.drinkName].bankPrice) : 0;
-  total += unitPrice * d.quantity;
   let sugarText = '';
   if(d.drinkName==='Coffee' || d.drinkName==='Tea'){
     sugarText = d.sugarChoice ? (body.lang==='ar' ? 'مع سكر' : 'With Sugar') : (body.lang==='ar' ? 'بدون سكر' : 'Without Sugar');
   }
   drinkSummary += `${d.quantity} x ${d.drinkName} ${sugarText}<br>`;
 });
-
 orderDetails.innerHTML = drinkSummary;
-totalPriceElement.textContent = total;
+
+// Show total
+totalPriceElement.textContent = totalPrice;
 
 function toggleLanguage() {
   const lang = body.getAttribute('lang');
@@ -149,7 +141,7 @@ function saveOrderToFirebase(){
     orderNumber,
     customerName,
     drinksOrder,
-    totalPrice: total,
+    totalPrice,
     paymentMethod,
     date: new Date().toLocaleDateString(),
     time: new Date().toLocaleTimeString()
